@@ -14,8 +14,8 @@ class ChessEngine(nn.Module):
         self.conv1 = nn.Conv2d(8, 8, 2)
         self.pool = nn.MaxPool2d(2, 2)
         self.conv2 = nn.Conv2d(8, 4, 2)
-        self.fc1 = nn.Linear(4 * 1 * 2, 10)
-        self.fc2 = nn.Linear(10, 5)
+        self.fc1 = nn.Linear(4 * 1 * 2, 8)
+        self.fc2 = nn.Linear(8, 5)
         self.fc3 = nn.Linear(5, 1)
 
     def forward(self, x):

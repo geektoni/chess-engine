@@ -26,7 +26,7 @@ if __name__ == "__main__":
     optimizer = SGD(chess_model.parameters(), lr=0.001, momentum=0.9)
 
     # Train the model
-    for epoch in range(10):
+    for epoch in range(500):
 
         epoch_loss = 0.0
         for i_batch, sample_batched in enumerate(dataloader):
