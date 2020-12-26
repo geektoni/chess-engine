@@ -1,3 +1,4 @@
+import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
@@ -20,12 +21,10 @@ class ChessEngine(nn.Module):
 
     def forward(self, x):
 
-        x = x.float()
-
         x = self.pool(F.relu(self.conv1(x)))
         x = self.pool(F.relu(self.conv2(x)))
         x = x.view(-1, 4 * 1 * 2)
-        x = F.relu(self.fc1(x))
-        x = F.relu(self.fc2(x))
+        x = torch.tanh(self.fc1(x))
+        x = torch.tanh(self.fc2(x))
         x = self.fc3(x)
         return x

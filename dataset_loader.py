@@ -44,8 +44,8 @@ class ChessDataset(Dataset):
         self.transform = transforms.Compose([transforms.ToTensor()])
 
     def __getitem__(self, index):
-        return self.dataset_X[index], \
-               self.dataset_Y[index]
+        return torch.FloatTensor(self.dataset_X[index]), \
+               torch.FloatTensor(self.dataset_Y[index])
 
     def __len__(self):
         return len(self.dataset_Y)
@@ -89,8 +89,6 @@ class ChessDataset(Dataset):
                 value = game_winner * (move_counter/total_moves)
                 board_cnv = self._convert_string_to_matrix(str(board))
                 board_cnv = self._convert_boards_to_one_hot(board_cnv)
-
-                board_cnv = np.array(board_cnv).reshape(8,8,12)
                 self.dataset_X.append(board_cnv)
                 self.dataset_Y.append(np.array([value]))
                 move_counter += 1

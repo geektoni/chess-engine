@@ -15,7 +15,7 @@ if __name__ == "__main__":
     dataset.convert_games()
 
     # Create the DataLoader object used for training
-    dataloader = DataLoader(dataset, batch_size=50,
+    dataloader = DataLoader(dataset, batch_size=100,
                             shuffle=True, num_workers=0)
 
     # Create the model we will use
@@ -38,7 +38,7 @@ if __name__ == "__main__":
 
             # forward + backward + optimize
             outputs = chess_model(inputs)
-            loss = criterion(outputs, labels.float())
+            loss = criterion(outputs, labels)
             loss.backward()
             optimizer.step()
 
