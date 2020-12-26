@@ -18,8 +18,8 @@ class ChessDataset(Dataset):
         self.already_loaded = False
 
         if os.path.isfile("./dataset/games_compressed.npz") and os.path.isfile("./dataset/values_compressed.npz"):
-            self.dataset_X = np.load("./games_compressed.npz")['arr_0']
-            self.dataset_Y = np.load("./values_compressed.npz")['arr_0']
+            self.dataset_X = np.load("./dataset/games_compressed.npz")['arr_0']
+            self.dataset_Y = np.load("./dataset/values_compressed.npz")['arr_0']
             self.already_loaded = True
         else:
             self.dataset_X = []

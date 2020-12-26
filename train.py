@@ -1,6 +1,7 @@
 from model import ChessEngine
 from dataset_loader import ChessDataset
 
+import torch
 from torch.utils.data import DataLoader
 from torch.nn import MSELoss
 from torch.optim import SGD
@@ -41,8 +42,12 @@ if __name__ == "__main__":
             loss.backward()
             optimizer.step()
 
+            # Print the training loss
             epoch_loss += loss.item()
             if i_batch%2000 == 0:
                 print('[%d, %5d] loss: %.3f' %
                           (epoch + 1, i_batch + 1, epoch_loss/2000))
                 epoch_loss = 0.0
+
+        # After each batch, we checkpoint the model
+        torch.save(chess_model.state_dict(), "./models/chess_model.pth")
