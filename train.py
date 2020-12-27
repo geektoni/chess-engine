@@ -8,6 +8,8 @@ from torch.optim import SGD
 
 import numpy as np
 
+from tqdm import tqdm
+
 
 if __name__ == "__main__":
 
@@ -16,16 +18,24 @@ if __name__ == "__main__":
     np.random.seed(2020)
     torch.set_deterministic(True)
 
-    model_save = "./chess_engine2.pth"
+    # Model name
+    model_save = "./chess_engine3.pth"
 
     # Create the dataset and convert the games into something
     # more usable (one-hot encoded version)
     dataset = ChessDataset(encoding_type="one-hot")
     dataset.convert_games()
 
+    # Split the dataset into train/test
+    lengths = len(dataset)
+    train, test = torch.utils.data.random_split(dataset, [int(lengths*0.8), int(lengths*0.2)])
+
     # Create the DataLoader object used for training
-    dataloader = DataLoader(dataset, batch_size=100,
-                            shuffle=True, num_workers=0)
+    dataloader_train = DataLoader(dataset, batch_size=100,
+                                shuffle=True, num_workers=0)
+
+    dataloader_test = DataLoader(dataset, batch_size=1,
+                                  shuffle=True, num_workers=0)
 
     # Create the model we will use
     chess_model = ChessEngine2()
@@ -45,10 +55,10 @@ if __name__ == "__main__":
 
 
     # Train the model
-    for epoch in range(1000):
+    for epoch in tqdm(range(1000)):
 
-        epoch_loss = 0.0
-        for i_batch, sample_batched in enumerate(dataloader):
+        train_loss = 0.0
+        for i_batch, sample_batched in enumerate(dataloader_train):
 
             inputs, labels = sample_batched
             inputs, labels = inputs.to(device), labels.to(device)
@@ -62,12 +72,26 @@ if __name__ == "__main__":
             loss.backward()
             optimizer.step()
 
-            # Print the training loss
-            epoch_loss += loss.item()
-            if i_batch%2000 == 0 and i_batch != 0:
-                print('[%d, %5d] loss: %.3f' %
-                          (epoch, i_batch, epoch_loss/2000))
-                epoch_loss = 0.0
+            train_loss += loss
+
+        # After each epoch return the validation results
+        validation_loss = 0.0
+        for t_batch, sample_batched_test in enumerate(dataloader_test):
+
+            # Use
+            if t_batch >= 10:
+                break
+
+            inputs, labels = sample_batched_test
+            inputs, labels = inputs.to(device), labels.to(device)
+
+            outputs = chess_model(inputs)
+            loss_validation = criterion(outputs, labels)
+
+            validation_loss += loss_validation
+
+        # Print the validation loss
+        print("Train/Validation Loss: {:.3f} {:.3f}".format(train_loss/i_batch, validation_loss/10))
 
         # After each batch, we checkpoint the model
         torch.save(chess_model.state_dict(), model_save)
