@@ -12,16 +12,23 @@ from tqdm import tqdm
 
 class ChessDataset(Dataset):
 
-    def __init__(self, dataset_path="./dataset/games.csv"):
+    def __init__(self, dataset_path="./dataset/", save_compressed=True):
 
-        self.original_dataset = pd.read_csv(dataset_path)
+        self.dataset_path = dataset_path
+        self.save_compressed = save_compressed
+
         self.already_loaded = False
 
-        if os.path.isfile("./dataset/games_compressed.npz") and os.path.isfile("./dataset/values_compressed.npz"):
-            self.dataset_X = np.load("./dataset/games_compressed.npz")['arr_0']
-            self.dataset_Y = np.load("./dataset/values_compressed.npz")['arr_0']
+        self.csv_dataset = os.path.join(self.dataset_path, "games.csv")
+        self.compressed_dataset_X = os.path.join(self.dataset_path, "games_compressed.npz")
+        self.compressed_dataset_Y = os.path.join(self.dataset_path, "values_compressed.npz")
+
+        if os.path.isfile(self.compressed_dataset_X) and os.path.isfile(self.compressed_dataset_Y):
+            self.dataset_X = np.load(self.compressed_dataset_X)['arr_0']
+            self.dataset_Y = np.load(self.compressed_dataset_Y)['arr_0']
             self.already_loaded = True
         else:
+            self.original_dataset = pd.read_csv(dataset_path)
             self.dataset_X = []
             self.dataset_Y = []
 
@@ -40,8 +47,6 @@ class ChessDataset(Dataset):
             'K': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
             '.': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
         }
-
-        self.transform = transforms.Compose([transforms.ToTensor()])
 
     def __getitem__(self, index):
         return torch.FloatTensor(self.dataset_X[index]), \
@@ -96,6 +101,8 @@ class ChessDataset(Dataset):
         self.dataset_X = np.array(self.dataset_X)
         self.dataset_Y = np.array(self.dataset_Y)
 
-        np.savez_compressed("games_compressed", self.dataset_X)
-        np.savez_compressed("values_compressed", self.dataset_Y)
+        # Save the results
+        if self.save_compressed:
+            np.savez_compressed("games_compressed", self.dataset_X)
+            np.savez_compressed("values_compressed", self.dataset_Y)
 

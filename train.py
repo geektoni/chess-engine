@@ -9,6 +9,8 @@ from torch.optim import SGD
 
 if __name__ == "__main__":
 
+    model_save = "./chess_engine.pth"
+
     # Create the dataset and convert the games into something
     # more usable (one-hot encoded version)
     dataset = ChessDataset()
@@ -26,7 +28,7 @@ if __name__ == "__main__":
     optimizer = SGD(chess_model.parameters(), lr=0.001, momentum=0.9)
 
     # Train the model
-    for epoch in range(500):
+    for epoch in range(1000):
 
         epoch_loss = 0.0
         for i_batch, sample_batched in enumerate(dataloader):
@@ -44,10 +46,10 @@ if __name__ == "__main__":
 
             # Print the training loss
             epoch_loss += loss.item()
-            if i_batch%2000 == 0:
+            if i_batch%2000 == 0 and i_batch != 0:
                 print('[%d, %5d] loss: %.3f' %
-                          (epoch + 1, i_batch + 1, epoch_loss/2000))
+                          (epoch, i_batch, epoch_loss/2000))
                 epoch_loss = 0.0
 
         # After each batch, we checkpoint the model
-        torch.save(chess_model.state_dict(), "./models/chess_model.pth")
+        torch.save(chess_model.state_dict(), model_save)
