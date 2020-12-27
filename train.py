@@ -20,7 +20,7 @@ if __name__ == "__main__":
 
     # Create the dataset and convert the games into something
     # more usable (one-hot encoded version)
-    dataset = ChessDataset()
+    dataset = ChessDataset(encoding_type="one-hot")
     dataset.convert_games()
 
     # Create the DataLoader object used for training
