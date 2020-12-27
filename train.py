@@ -27,6 +27,16 @@ if __name__ == "__main__":
     criterion = MSELoss()
     optimizer = SGD(chess_model.parameters(), lr=0.001, momentum=0.9)
 
+    # Check if we are on GPU, then move everything to GPU
+    if torch.cuda.is_available():
+        device = "cuda:0"
+    else:
+        device = "cpu"
+
+    # Move model to device
+    chess_model.to(device)
+
+
     # Train the model
     for epoch in range(1000):
 
@@ -34,6 +44,7 @@ if __name__ == "__main__":
         for i_batch, sample_batched in enumerate(dataloader):
 
             inputs, labels = sample_batched
+            inputs, labels = inputs.to(device), labels.to(device)
 
             # zero the parameter gradients
             optimizer.zero_grad()
