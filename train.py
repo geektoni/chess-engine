@@ -1,4 +1,4 @@
-from model import ChessEngine
+from model import ChessEngine, ChessEngine2
 from dataset_loader import ChessDataset
 
 import torch
@@ -9,7 +9,7 @@ from torch.optim import SGD
 
 if __name__ == "__main__":
 
-    model_save = "./chess_engine.pth"
+    model_save = "./chess_engine2.pth"
 
     # Create the dataset and convert the games into something
     # more usable (one-hot encoded version)
@@ -21,7 +21,7 @@ if __name__ == "__main__":
                             shuffle=True, num_workers=0)
 
     # Create the model we will use
-    chess_model = ChessEngine()
+    chess_model = ChessEngine2()
 
     # Define the optimizer
     criterion = MSELoss()
