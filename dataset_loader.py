@@ -28,7 +28,7 @@ class ChessDataset(Dataset):
             self.dataset_Y = np.load(self.compressed_dataset_Y)['arr_0']
             self.already_loaded = True
         else:
-            self.original_dataset = pd.read_csv(dataset_path)
+            self.original_dataset = pd.read_csv(self.csv_dataset)
             self.dataset_X = []
             self.dataset_Y = []
 
