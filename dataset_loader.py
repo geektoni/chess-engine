@@ -12,7 +12,7 @@ from tqdm import tqdm
 
 class ChessDataset(Dataset):
 
-    def __init__(self, dataset_path="./dataset/", save_compressed=True, encoding_type="one-hot"):
+    def __init__(self, dataset_path="./dataset/", save_compressed=True, encoding_type="one_hot"):
 
         self.dataset_path = dataset_path
         self.save_compressed = save_compressed
@@ -20,8 +20,10 @@ class ChessDataset(Dataset):
         self.already_loaded = False
 
         self.csv_dataset = os.path.join(self.dataset_path, "games.csv")
-        self.compressed_dataset_X = os.path.join(self.dataset_path, "games_compressed.npz")
-        self.compressed_dataset_Y = os.path.join(self.dataset_path, "values_compressed.npz")
+        self.compressed_dataset_X = os.path.join(self.dataset_path,
+                                                 "games_compressed_{}.npz".format(encoding_type))
+        self.compressed_dataset_Y = os.path.join(self.dataset_path,
+                                                 "values_compressed_{}.npz".format(encoding_type))
 
         if os.path.isfile(self.compressed_dataset_X) and os.path.isfile(self.compressed_dataset_Y):
             self.dataset_X = np.load(self.compressed_dataset_X)['arr_0']
@@ -32,7 +34,7 @@ class ChessDataset(Dataset):
             self.dataset_X = []
             self.dataset_Y = []
 
-        if encoding_type == "one-hot":
+        if encoding_type == "one_hot":
             self.chess_dict = {
                 'p': [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                 'P': [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
@@ -120,6 +122,6 @@ class ChessDataset(Dataset):
 
         # Save the results
         if self.save_compressed:
-            np.savez_compressed("games_compressed", self.dataset_X)
-            np.savez_compressed("values_compressed", self.dataset_Y)
+            np.savez_compressed(self.compressed_dataset_X, self.dataset_X)
+            np.savez_compressed(self.compressed_dataset_Y, self.dataset_Y)
 

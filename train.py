@@ -1,4 +1,4 @@
-from model import ChessEngine, ChessEngine2
+from model import ChessEngine, ChessEngine2, ChessEngineBinary
 from dataset_loader import ChessDataset
 
 import torch
@@ -19,11 +19,11 @@ if __name__ == "__main__":
     torch.set_deterministic(True)
 
     # Model name
-    model_save = "./chess_engine3.pth"
+    model_save = "./chess_engine_binary.pth"
 
     # Create the dataset and convert the games into something
     # more usable (one-hot encoded version)
-    dataset = ChessDataset(encoding_type="one-hot")
+    dataset = ChessDataset(encoding_type="binary")
     dataset.convert_games()
 
     # Split the dataset into train/test
@@ -38,7 +38,7 @@ if __name__ == "__main__":
                                   shuffle=True, num_workers=0)
 
     # Create the model we will use
-    chess_model = ChessEngine2()
+    chess_model = ChessEngineBinary(encoding_type="binary")
 
     # Define the optimizer
     criterion = MSELoss()
