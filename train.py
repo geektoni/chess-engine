@@ -6,8 +6,15 @@ from torch.utils.data import DataLoader
 from torch.nn import MSELoss
 from torch.optim import SGD
 
+import numpy as np
+
 
 if __name__ == "__main__":
+
+    # Set seed and deterministic behaviour
+    torch.manual_seed(2020)
+    np.random.seed(2020)
+    torch.set_deterministic(True)
 
     model_save = "./chess_engine2.pth"
 
