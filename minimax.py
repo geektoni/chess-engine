@@ -4,11 +4,13 @@ import torch
 
 class ActorChess:
 
-    def __init__(self, model, board):
+    def __init__(self, model, board, depth=2, player="White"):
 
         self.model = model
         self.board = board
-        self.depth = 2
+        self.depth = depth
+
+        self.maximizer = (player == "White")
 
         self.chess_dict = {
             'p': [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -88,7 +90,7 @@ class ActorChess:
             "parent": None,
             "move": None,
             "next_moves": list(self.board.legal_moves),
-            "maximizer": True,
+            "maximizer": self.maximizer,
             "childs": [],
             "terminal": len(list(self.board.legal_moves)) == 0 or self.board.is_game_over(),
             "value": self.model(board_input).item(),
@@ -96,7 +98,7 @@ class ActorChess:
         }
 
         # Compute the Alpha-beta algorithm
-        self._alpha_beta(root, self.depth, -1, 1, True)
+        self._alpha_beta(root, self.depth, -1, 1, self.maximizer)
 
         # Then, for each child node we get the one with the highest value
         max_node = -1
@@ -121,11 +123,11 @@ class ActorChess:
                 self._build_tree(node, self.board, maximizing)
 
             # Iterate over all the childs
-            value = -1
+            node["best_value"] = -1
             for child in node["childs"]:
                 self.board.push_san(str(child["move"]))
-                node["best_value"] = max(node["best_value"], self._alpha_beta(child, depth-1, alpha, beta, not maximizing))
-                alpha = max(alpha, value)
+                node["best_value"] = max(node["best_value"], self._alpha_beta(child, depth-1, alpha, beta, False))
+                alpha = max(alpha, node["best_value"])
                 self.board.pop()
                 if alpha >= beta:
                     break
@@ -138,11 +140,11 @@ class ActorChess:
                 self._build_tree(node, self.board, maximizing)
 
             # Iterate over all the childs
-            value = 1
+            node["best_value"] = 1
             for child in node["childs"]:
                 self.board.push_san(str(child["move"]))
-                node["best_value"] = min(node["best_value"], self._alpha_beta(child, depth - 1, alpha, beta, not maximizing))
-                beta = min(beta, value)
+                node["best_value"] = min(node["best_value"], self._alpha_beta(child, depth - 1, alpha, beta, True))
+                beta = min(beta, node["best_value"])
                 self.board.pop()
                 if beta >= alpha:
                     break
