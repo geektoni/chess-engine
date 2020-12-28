@@ -110,11 +110,16 @@ class ChessDataset(Dataset):
             move_counter = 0
             for move in moves:
                 board.push_san(move)
-                value = game_winner * (move_counter/total_moves)
-                board_cnv = self._convert_string_to_matrix(str(board))
-                board_cnv = self._convert_boards_to_one_hot(board_cnv)
-                self.dataset_X.append(board_cnv)
-                self.dataset_Y.append(np.array([value]))
+
+                # Skip the first 10 moves (5 for each). This should ensure better
+                # convergence since the first moves are usually not informative.
+                if move_counter > 9:
+                    value = game_winner * (move_counter / total_moves)
+                    board_cnv = self._convert_string_to_matrix(str(board))
+                    board_cnv = self._convert_boards_to_one_hot(board_cnv)
+                    self.dataset_X.append(board_cnv)
+                    self.dataset_Y.append(np.array([value]))
+
                 move_counter += 1
 
         self.dataset_X = np.array(self.dataset_X)
