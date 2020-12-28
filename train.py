@@ -1,4 +1,4 @@
-from model import ChessEngine, ChessEngine2, ChessEngineBinary
+from model import ChessEngine
 from dataset_loader import ChessDataset
 
 import torch
@@ -10,20 +10,48 @@ import numpy as np
 
 from tqdm import tqdm
 
+from argparse import ArgumentParser
+import os
+import datetime
 
 if __name__ == "__main__":
 
+    # Set up the argument parser
+    parser = ArgumentParser()
+    parser.add_argument("--save-model", type=str, help="Location where to save the trained model", default="./models")
+    parser.add_argument("--dataset", type=str, help="Location where to search for/create the dataset",
+                        default="./dataset")
+    parser.add_argument("--seed", type=int, help="Set the random number generator seed to ensure reproducibility",
+                        default=2020)
+    parser.add_argument("--encoding", type=str, help="Select the encoding used for the chess positions (one_hot "
+                                                       "or binary)", default="one_hot")
+    parser.add_argument("--epochs", type=int, help="Training epochs", default=1000)
+    parser.add_argument("--gpu", type=bool, help="If True, the training will procede on a GPU if it is available",
+                        default=True)
+
+    # Parse the arguments
+    args = parser.parse_args()
+
+    dataset_directory = args.dataset
+    model_directory = args.save_model
+    seed = args.seed
+    encoding = args.encoding
+    epochs = args.epochs
+    gpu = args.gpu
+
     # Set seed and deterministic behaviour
-    torch.manual_seed(2020)
-    np.random.seed(2020)
+    torch.manual_seed(seed)
+    np.random.seed(seed)
     torch.set_deterministic(True)
 
     # Model name
-    model_save = "./chess_engine_one_hot.pth"
+    timestamp = str(datetime.datetime.now().strftime("%Y%m%d_%H%M%S"))
+    model_save = os.path.join(model_directory,
+                              "chess_engine_one_hot_{}.pth".format(timestamp))
 
     # Create the dataset and convert the games into something
     # more usable (one-hot encoded version)
-    dataset = ChessDataset(encoding_type="one_hot")
+    dataset = ChessDataset(dataset_path=dataset_directory, encoding_type=encoding)
     dataset.convert_games()
 
     # Split the dataset into train/test
@@ -40,14 +68,14 @@ if __name__ == "__main__":
                                   shuffle=True, num_workers=0)
 
     # Create the model we will use
-    chess_model = ChessEngine2(encoding_type="one_hot")
+    chess_model = ChessEngine(encoding_type=encoding)
 
     # Define the optimizer
     criterion = MSELoss()
     optimizer = Adam(chess_model.parameters(), lr=0.001)
 
     # Check if we are on GPU, then move everything to GPU
-    if torch.cuda.is_available():
+    if torch.cuda.is_available() and gpu:
         device = "cuda:0"
     else:
         device = "cpu"
@@ -57,7 +85,7 @@ if __name__ == "__main__":
 
 
     # Train the model
-    for epoch in tqdm(range(1000)):
+    for epoch in tqdm(range(epochs)):
 
         train_loss = 0.0
         for i_batch, sample_batched in enumerate(dataloader_train):
