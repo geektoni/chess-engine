@@ -12,6 +12,11 @@ class ActorChess:
 
         self.maximizer = (player == "White")
 
+        # This dictionary will store the valutation for all the positions
+        # visited. This way, we won't have to recompute their value multiple
+        # times.
+        self.position_table = {}
+
         self.chess_dict = {
             'p': [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             'P': [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
@@ -62,6 +67,7 @@ class ActorChess:
             # Create a new node and append it to
             # the childs list
             tmp_node = {
+                "hash": str(board),
                 "parent": node,
                 "move": str(next_move),
                 "next_moves": list(board.legal_moves),
@@ -87,6 +93,7 @@ class ActorChess:
         # Create a new node and append it to
         # the childs list
         root = {
+            "hash": str(self.board),
             "parent": None,
             "move": None,
             "next_moves": list(self.board.legal_moves),
@@ -126,7 +133,13 @@ class ActorChess:
             node["best_value"] = -1
             for child in node["childs"]:
                 self.board.push_san(str(child["move"]))
-                node["best_value"] = max(node["best_value"], self._alpha_beta(child, depth-1, alpha, beta, False))
+
+                if str(self.board) in self.position_table:
+                    node["best_value"] = self.position_table[str(self.board)]
+                else:
+                    node["best_value"] = max(node["best_value"], self._alpha_beta(child, depth-1, alpha, beta, False))
+                    self.position_table[str(self.board)] = node["best_value"]
+
                 alpha = max(alpha, node["best_value"])
                 self.board.pop()
                 if alpha >= beta:
@@ -143,7 +156,13 @@ class ActorChess:
             node["best_value"] = 1
             for child in node["childs"]:
                 self.board.push_san(str(child["move"]))
-                node["best_value"] = min(node["best_value"], self._alpha_beta(child, depth - 1, alpha, beta, True))
+
+                if str(self.board) in self.position_table:
+                    node["best_value"] = self.position_table[str(self.board)]
+                else:
+                    node["best_value"] = min(node["best_value"], self._alpha_beta(child, depth-1, alpha, beta, True))
+                    self.position_table[str(self.board)] = node["best_value"]
+
                 beta = min(beta, node["best_value"])
                 self.board.pop()
                 if beta >= alpha:
