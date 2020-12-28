@@ -4,7 +4,7 @@ from dataset_loader import ChessDataset
 import torch
 from torch.utils.data import DataLoader
 from torch.nn import MSELoss
-from torch.optim import SGD
+from torch.optim import Adam
 
 import numpy as np
 
@@ -19,16 +19,18 @@ if __name__ == "__main__":
     torch.set_deterministic(True)
 
     # Model name
-    model_save = "./chess_engine_binary.pth"
+    model_save = "./chess_engine_one_hot.pth"
 
     # Create the dataset and convert the games into something
     # more usable (one-hot encoded version)
-    dataset = ChessDataset(encoding_type="binary")
+    dataset = ChessDataset(encoding_type="one_hot")
     dataset.convert_games()
 
     # Split the dataset into train/test
     lengths = len(dataset)
-    train, test = torch.utils.data.random_split(dataset, [int(lengths*0.8), int(lengths*0.2)])
+    train_length = int(lengths*0.8)
+    test_length = lengths - train_length
+    train, test = torch.utils.data.random_split(dataset, [train_length, test_length])
 
     # Create the DataLoader object used for training
     dataloader_train = DataLoader(dataset, batch_size=100,
@@ -38,11 +40,11 @@ if __name__ == "__main__":
                                   shuffle=True, num_workers=0)
 
     # Create the model we will use
-    chess_model = ChessEngineBinary(encoding_type="binary")
+    chess_model = ChessEngine2(encoding_type="one_hot")
 
     # Define the optimizer
     criterion = MSELoss()
-    optimizer = SGD(chess_model.parameters(), lr=0.001, momentum=0.9)
+    optimizer = Adam(chess_model.parameters(), lr=0.001)
 
     # Check if we are on GPU, then move everything to GPU
     if torch.cuda.is_available():
