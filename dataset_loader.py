@@ -103,7 +103,7 @@ class ChessDataset(Dataset):
         for index, game in tqdm(self.original_dataset.iterrows(), total=self.original_dataset.shape[0]):
 
             # Get only the final 8 moves of each game.
-            moves = game["moves"].split(" ")[:-16]
+            moves = game["moves"].split(" ")[:-20]
             total_moves = len(moves)
             game_winner = 1 if game["winner"] == "white" else -1
 
