@@ -61,11 +61,13 @@ if __name__ == "__main__":
     train, test = torch.utils.data.random_split(dataset, [train_length, test_length])
 
     # Create the DataLoader object used for training
-    dataloader_train = DataLoader(dataset, batch_size=100,
-                                shuffle=True, num_workers=0)
+    dataloader_train = DataLoader(train, batch_size=500,
+                                shuffle=True, num_workers=4,
+                                pin_memory=True)
 
-    dataloader_test = DataLoader(dataset, batch_size=1,
-                                  shuffle=True, num_workers=0)
+    dataloader_test = DataLoader(test, batch_size=500,
+                                  shuffle=True, num_workers=4,
+                                 pin_memory=True)
 
     # Create the model we will use
     chess_model = ChessEngine(encoding_type=encoding)
@@ -108,10 +110,6 @@ if __name__ == "__main__":
         validation_loss = 0.0
         for t_batch, sample_batched_test in enumerate(dataloader_test):
 
-            # Use
-            if t_batch >= 10:
-                break
-
             inputs, labels = sample_batched_test
             inputs, labels = inputs.to(device), labels.to(device)
 
@@ -121,7 +119,8 @@ if __name__ == "__main__":
             validation_loss += loss_validation
 
         # Print the validation loss
-        print("Train/Validation Loss: {:.3f} {:.3f}".format(train_loss/i_batch, validation_loss/10))
+        print("Train/Validation Loss: {:.3f} {:.3f}".format(train_loss/i_batch,
+                                                            validation_loss/t_batch))
 
         # After each batch, we checkpoint the model
         torch.save(chess_model.state_dict(), model_save)
