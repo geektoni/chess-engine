@@ -103,18 +103,19 @@ class ChessDataset(Dataset):
         for index, game in tqdm(self.original_dataset.iterrows(), total=self.original_dataset.shape[0]):
 
             # Get only the final 8 moves of each game.
-            moves = game["moves"].split(" ")[:-20]
+            moves = game["moves"].split(" ")
             total_moves = len(moves)
             game_winner = 1 if game["winner"] == "white" else -1
 
             board = chess.Board()
             move_counter = 0
             for move in moves:
+
                 board.push_san(move)
 
                 # Skip the first 10 moves (5 for each). This should ensure better
                 # convergence since the first moves are usually not informative.
-                if move_counter > 9:
+                if move_counter > 9 or not "x" in move:
                     value = game_winner * (move_counter / total_moves)
                     board_cnv = self._convert_string_to_matrix(str(board))
                     board_cnv = self._convert_boards_to_one_hot(board_cnv)
