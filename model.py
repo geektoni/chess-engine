@@ -16,7 +16,7 @@ class ChessEngine(nn.Module):
         self.conv1 = nn.Conv2d(8, 8, 2)
         self.pool = nn.MaxPool2d(2, 2)
         self.conv2 = nn.Conv2d(8, 8, 2)
-        self.fc1 = nn.Linear(8 * 1 * 2, 16)
+        self.fc1 = nn.Linear(8 * 1 * self.encoding, 16)
         self.fc2 = nn.Linear(16, 8)
         self.fc3 = nn.Linear(8, 1)
 
